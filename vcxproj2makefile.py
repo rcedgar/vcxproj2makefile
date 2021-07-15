@@ -116,6 +116,9 @@ for Name in CNames:
     Out("  o/%s.o \\" % Name)
 
 Out("")
+Out(".PHONY: clean")
+
+Out("")
 Out("o/%s : o/ $(OBJS)" % progname)
 Out("	%s $(LDFLAGS) $(OBJS) -o $@%s" % (
     "$(CXX)" if CXXNames else "$(CC)",
@@ -136,6 +139,10 @@ if CXXNames:
     Out("")
     Out("o/%.o : %.cpp $(HDRS)")
     Out("	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<")
+
+Out("")
+Out("clean:")
+Out("	-rm -rf o/")
 
 f.close()
 fo.close()
