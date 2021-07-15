@@ -50,7 +50,7 @@ def Out(s, OS="ALL"):
         Die("OS %s", OS)
 
 
-CPPNames = []
+CXXNames = []
 CNames = []
 with open(ProjFileName) as File:
     for Line in File:
@@ -66,7 +66,7 @@ with open(ProjFileName) as File:
             FileName = FileName.replace("/>", "")
             if FileName.endswith(".cpp"):
                 FileName = FileName.replace(".cpp", "")
-                CPPNames.append(FileName)
+                CXXNames.append(FileName)
             elif FileName.endswith(".c"):
                 FileName = FileName.replace(".c", "")
                 CNames.append(FileName)
@@ -76,7 +76,7 @@ with open(ProjFileName) as File:
             Line = Line.replace("</ProjectName>", "")
             progname = Line
 
-assert len(CPPNames) > 0 or len(CNames) > 0
+assert len(CXXNames) > 0 or len(CNames) > 0
 
 binname = progname
 if DEBUG:
@@ -87,21 +87,20 @@ if "/" in binname:
 if "\\" in binname:
     binname = binname.split("\\")[-1]
 
-# CNames CPPNames
+if CNames:
+    Out("CC = gcc", Linux)
+    Out("CC = gcc", OSX)
+    Out("CFLAGS = -O3 -DNDEBUG -fopenmp -ffast-math -msse -mfpmath=sse")
+    Out("")
 
-Out("CPP = ccache g++", Linux)
-Out("CPP = g++", OSX)
-Out("CPPOPTS = -fopenmp -ffast-math -msse -mfpmath=sse -O3 -DNDEBUG -c")
+if CXXNames:
+    Out("CXX = g++", Linux)
+    Out("CXX = g++", OSX)
+    Out("CXXFLAGS = -O3 -DNDEBUG -fopenmp -ffast-math -msse -mfpmath=sse")
+    Out("")
 
-Out("")
-Out("CC = ccache gcc", Linux)
-Out("CC = gcc", OSX)
-Out("CCOPTS = -fopenmp -ffast-math -msse -mfpmath=sse -O3 -DNDEBUG -c")
-Out("")
-
-Out("LNK = g++")
-Out("LNKOPTS = -O3 -fopenmp -pthread -lpthread -static", Linux)
-Out("LNKOPTS = -O3 -fopenmp -pthread -lpthread", OSX)
+Out("LDFLAGS = -O3 -fopenmp -pthread -lpthread -static", Linux)
+Out("LDFLAGS = -O3 -fopenmp -pthread -lpthread", OSX)
 
 Out("")
 Out("HDRS = \\")
@@ -110,33 +109,33 @@ for Name in sorted(HdrNames):
 
 Out("")
 Out("OBJS = \\")
-for Name in CPPNames:
+for Name in CXXNames:
     Out("  o/%s.o \\" % Name)
 
 for Name in CNames:
     Out("  o/%s.o \\" % Name)
 
 Out("")
-Out("%s : o/ $(OBJS)" % progname)
-if LRT:
-    Out("	$(LNK) $(LNKOPTS) $(OBJS) -o o/%s -lrt" % progname)
-else:
-    Out("	$(LNK) $(LNKOPTS) $(OBJS) -o o/%s" % progname)
+Out("o/%s : o/ $(OBJS)" % progname)
+Out("	%s $(LDFLAGS) $(OBJS) -o $@%s" % (
+    "$(CXX)" if CXXNames else "$(CC)",
+    " -lrt" if LRT else "",
+))
 Out("	strip -d o/%s" % progname)
 
 Out("")
 Out("o/ :")
 Out("	mkdir -p o/")
 
-for Name in CNames:
+if CNames:
     Out("")
-    Out("o/%s.o : %s.c $(HDRS)" % (Name, Name))
-    Out("	$(CC) $(CCOPTS) -o o/%s.o %s.c" % (Name, Name))
+    Out("o/%.o : %.c $(HDRS)")
+    Out("	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<")
 
-for Name in CPPNames:
+if CXXNames:
     Out("")
-    Out("o/%s.o : %s.cpp $(HDRS)" % (Name, Name))
-    Out("	$(CPP) $(CPPOPTS) -o o/%s.o %s.cpp" % (Name, Name))
+    Out("o/%.o : %.cpp $(HDRS)")
+    Out("	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<")
 
 f.close()
 fo.close()
