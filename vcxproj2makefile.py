@@ -32,22 +32,10 @@ Fields = Name.split(".")
 progname = Fields[0]
 
 f = open("Makefile", "w")
-fo = open("Makefile_osx", "w")
-
-Linux = "Linux"
-OSX = "OSX"
 
 
-def Out(s, OS="ALL"):
-    if OS == "ALL":
-        print(s, file=f)
-        print(s, file=fo)
-    elif OS == Linux:
-        print(s, file=f)
-    elif OS == OSX:
-        print(s, file=fo)
-    else:
-        Die("OS %s", OS)
+def Out(s):
+    print(s, file=f)
 
 
 CXXNames = []
@@ -87,20 +75,23 @@ if "/" in binname:
 if "\\" in binname:
     binname = binname.split("\\")[-1]
 
+Out("UNAME_S := $(shell uname -s)")
+
 if CNames:
-    Out("CC = gcc", Linux)
-    Out("CC = gcc", OSX)
-    Out("CFLAGS = -O3 -DNDEBUG -fopenmp -ffast-math -msse -mfpmath=sse")
     Out("")
+    Out("CC = gcc")
+    Out("CFLAGS = -O3 -DNDEBUG -fopenmp -ffast-math -msse -mfpmath=sse")
 
 if CXXNames:
-    Out("CXX = g++", Linux)
-    Out("CXX = g++", OSX)
-    Out("CXXFLAGS = -O3 -DNDEBUG -fopenmp -ffast-math -msse -mfpmath=sse")
     Out("")
+    Out("CXX = g++")
+    Out("CXXFLAGS = -O3 -DNDEBUG -fopenmp -ffast-math -msse -mfpmath=sse")
 
-Out("LDFLAGS = -O3 -fopenmp -pthread -lpthread -static", Linux)
-Out("LDFLAGS = -O3 -fopenmp -pthread -lpthread", OSX)
+Out("")
+Out("LDFLAGS = -O3 -fopenmp -pthread -lpthread")
+Out("ifeq ($(UNAME_S),Linux)")
+Out("    LDFLAGS += -static")
+Out("endif")
 
 Out("")
 Out("HDRS = \\")
@@ -145,4 +136,3 @@ Out("clean:")
 Out("	-rm -rf o/")
 
 f.close()
-fo.close()
