@@ -6,11 +6,6 @@ import os
 import sys
 
 
-def Die(s):
-    print("***ERROR***", sys.argv[0], s, file=sys.stderr)
-    sys.exit(1)
-
-
 LRT = False
 DEBUG = False
 SVNVER = False
@@ -80,15 +75,15 @@ Out("UNAME_S := $(shell uname -s)")
 if CNames:
     Out("")
     Out("CC = gcc")
-    Out("CFLAGS = -O3 -DNDEBUG -fopenmp -ffast-math -msse -mfpmath=sse")
+    Out("CFLAGS = $(CFLAGS) -O3 -DNDEBUG -fopenmp -ffast-math -msse -mfpmath=sse")
 
 if CXXNames:
     Out("")
     Out("CXX = g++")
-    Out("CXXFLAGS = -O3 -DNDEBUG -fopenmp -ffast-math -msse -mfpmath=sse")
+    Out("CXXFLAGS = $(CXXFLAGS) -O3 -DNDEBUG -fopenmp -ffast-math -msse -mfpmath=sse")
 
 Out("")
-Out("LDFLAGS = -O3 -fopenmp -pthread -lpthread")
+Out("LDFLAGS = $(LDFLAGS) -O3 -fopenmp -pthread -lpthread")
 Out("ifeq ($(UNAME_S),Linux)")
 Out("    LDFLAGS += -static")
 Out("endif")
