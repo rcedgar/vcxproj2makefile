@@ -75,15 +75,15 @@ Out("UNAME_S := $(shell uname -s)")
 if CNames:
     Out("")
     Out("CC = gcc")
-    Out("CFLAGS = $(CFLAGS) -O3 -DNDEBUG -fopenmp -ffast-math -msse -mfpmath=sse")
+    Out("CFLAGS := $(CFLAGS) -O3 -DNDEBUG -fopenmp -ffast-math -msse -mfpmath=sse")
 
 if CXXNames:
     Out("")
     Out("CXX = g++")
-    Out("CXXFLAGS = $(CXXFLAGS) -O3 -DNDEBUG -fopenmp -ffast-math -msse -mfpmath=sse")
+    Out("CXXFLAGS := $(CXXFLAGS) -O3 -DNDEBUG -fopenmp -ffast-math -msse -mfpmath=sse")
 
 Out("")
-Out("LDFLAGS = $(LDFLAGS) -O3 -fopenmp -pthread -lpthread")
+Out("LDFLAGS := $(LDFLAGS) -O3 -fopenmp -pthread -lpthread")
 Out("ifeq ($(UNAME_S),Linux)")
 Out("    LDFLAGS += -static")
 Out("endif")
