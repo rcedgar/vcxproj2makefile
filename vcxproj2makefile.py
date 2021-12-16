@@ -72,15 +72,18 @@ if "\\" in binname:
 
 Out("UNAME_S := $(shell uname -s)")
 
+Out("")
+Out("CPPFLAGS := $(CPPFLAGS) -DNDEBUG -pthread")
+
 if CNames:
     Out("")
     Out("CC = gcc")
-    Out("CFLAGS := $(CFLAGS) -O3 -DNDEBUG -fopenmp -ffast-math -msse -mfpmath=sse")
+    Out("CFLAGS := $(CFLAGS) -O3 -fopenmp -ffast-math -msse -mfpmath=sse")
 
 if CXXNames:
     Out("")
     Out("CXX = g++")
-    Out("CXXFLAGS := $(CXXFLAGS) -O3 -DNDEBUG -fopenmp -ffast-math -msse -mfpmath=sse")
+    Out("CXXFLAGS := $(CXXFLAGS) -O3 -fopenmp -ffast-math -msse -mfpmath=sse")
 
 Out("")
 Out("LDFLAGS := $(LDFLAGS) -O3 -fopenmp -pthread -lpthread")
