@@ -26,13 +26,6 @@ Name = Fields[n-1]
 Fields = Name.split(".")
 progname = Fields[0]
 
-f = open("Makefile", "w")
-
-
-def Out(s):
-    print(s, file=f)
-
-
 CXXNames = []
 CNames = []
 with open(ProjFileName) as File:
@@ -70,67 +63,69 @@ if "/" in binname:
 if "\\" in binname:
     binname = binname.split("\\")[-1]
 
-Out("UNAME_S := $(shell uname -s)")
+with open("Makefile", "w") as f:
+    def Out(s):
+        print(s, file=f)
 
-Out("")
-Out("CPPFLAGS := $(CPPFLAGS) -DNDEBUG -pthread")
+    Out("UNAME_S := $(shell uname -s)")
 
-if CNames:
     Out("")
-    Out("CC = gcc")
-    Out("CFLAGS := $(CFLAGS) -O3 -fopenmp -ffast-math -msse -mfpmath=sse")
+    Out("CPPFLAGS := $(CPPFLAGS) -DNDEBUG -pthread")
 
-if CXXNames:
+    if CNames:
+        Out("")
+        Out("CC = gcc")
+        Out("CFLAGS := $(CFLAGS) -O3 -fopenmp -ffast-math -msse -mfpmath=sse")
+
+    if CXXNames:
+        Out("")
+        Out("CXX = g++")
+        Out("CXXFLAGS := $(CXXFLAGS) -O3 -fopenmp -ffast-math -msse -mfpmath=sse")
+
     Out("")
-    Out("CXX = g++")
-    Out("CXXFLAGS := $(CXXFLAGS) -O3 -fopenmp -ffast-math -msse -mfpmath=sse")
+    Out("LDFLAGS := $(LDFLAGS) -O3 -fopenmp -pthread -lpthread")
+    Out("ifeq ($(UNAME_S),Linux)")
+    Out("    LDFLAGS += -static")
+    Out("endif")
 
-Out("")
-Out("LDFLAGS := $(LDFLAGS) -O3 -fopenmp -pthread -lpthread")
-Out("ifeq ($(UNAME_S),Linux)")
-Out("    LDFLAGS += -static")
-Out("endif")
-
-Out("")
-Out("HDRS = \\")
-for Name in sorted(HdrNames):
-    Out("  %s \\" % Name)
-
-Out("")
-Out("OBJS = \\")
-for Name in CXXNames:
-    Out("  o/%s.o \\" % Name)
-
-for Name in CNames:
-    Out("  o/%s.o \\" % Name)
-
-Out("")
-Out(".PHONY: clean")
-
-Out("")
-Out("o/%s : o/ $(OBJS)" % progname)
-Out("	%s $(LDFLAGS) $(OBJS) -o $@%s" % (
-    "$(CXX)" if CXXNames else "$(CC)",
-    " -lrt" if LRT else "",
-))
-Out("	strip -d o/%s" % progname)
-
-Out("")
-Out("o/ :")
-Out("	mkdir -p o/")
-
-if CNames:
     Out("")
-    Out("o/%.o : %.c $(HDRS)")
-    Out("	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<")
+    Out("HDRS = \\")
+    for Name in sorted(HdrNames):
+        Out("  %s \\" % Name)
 
-if CXXNames:
     Out("")
-    Out("o/%.o : %.cpp $(HDRS)")
-    Out("	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<")
+    Out("OBJS = \\")
+    for Name in CXXNames:
+        Out("  o/%s.o \\" % Name)
 
-Out("")
-Out("clean:")
-Out("	-rm -rf o/")
+    for Name in CNames:
+        Out("  o/%s.o \\" % Name)
 
-f.close()
+    Out("")
+    Out(".PHONY: clean")
+
+    Out("")
+    Out("o/%s : o/ $(OBJS)" % progname)
+    Out("	%s $(LDFLAGS) $(OBJS) -o $@%s" % (
+        "$(CXX)" if CXXNames else "$(CC)",
+        " -lrt" if LRT else "",
+    ))
+    Out("	strip -d o/%s" % progname)
+
+    Out("")
+    Out("o/ :")
+    Out("	mkdir -p o/")
+
+    if CNames:
+        Out("")
+        Out("o/%.o : %.c $(HDRS)")
+        Out("	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<")
+
+    if CXXNames:
+        Out("")
+        Out("o/%.o : %.cpp $(HDRS)")
+        Out("	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<")
+
+    Out("")
+    Out("clean:")
+    Out("	-rm -rf o/")
